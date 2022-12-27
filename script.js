@@ -102,59 +102,60 @@ window.addEventListener("load", function () {
       }
     }
   }
-  //   class Object {
-  //     constructor(game) {
-  //       this.game = game;
-  //     }
-  //     draw(context) {
-  //       context.drawImage(this.image, this.x, this.y, this.width, this.height);
-  //     }
-  //   }
-  //   class Bush extends Object() {
-  //     constructor(game) {
-  //       super(game);
-  //       this.game = game;
-  //       this.image = document.getElementById("bush");
-  //       this.imageWidth = 216;
-  //       this.imageHeight = 100;
-  //       this.width = this.imageWidth;
-  //       this.height = this.imageHeight;
-  //       this.x = Math.random() * this.game.width - this.width;
-  //       this.y =
-  //         this.game.topMargin +
-  //         Math.random() * (this.game.height - this.height - this.game.topMargin);
-  //     }
-  //   }
-  //   class Plant extends Object() {
-  //     constructor(game) {
-  //       super(game);
-  //       this.game = game;
-  //       this.image = document.getElementById("plant");
-  //       this.imageWidth = 212;
-  //       this.imageHeight = 118;
-  //       this.width = this.imageWidth;
-  //       this.height = this.imageHeight;
-  //       this.x = Math.random() * this.game.width - this.width;
-  //       this.y =
-  //         this.game.topMargin +
-  //         Math.random() * (this.game.height - this.height - this.game.topMargin);
-  //     }
-  //   }
-  //   class Grass extends Object() {
-  //     constructor(game) {
-  //       super(game);
-  //       this.game = game;
-  //       this.image = document.getElementById("grass");
-  //       this.imageWidth = 103;
-  //       this.imageHeight = 182;
-  //       this.width = this.imageWidth;
-  //       this.height = this.imageHeight;
-  //       this.x = Math.random() * this.game.width - this.width;
-  //       this.y =
-  //         this.game.topMargin +
-  //         Math.random() * (this.game.height - this.height - this.game.topMargin);
-  //     }
-  //   }
+  class Object {
+    constructor(game) {
+      this.game = game;
+    }
+    draw(context) {
+      context.drawImage(this.image, this.x, this.y, this.width, this.height);
+    }
+    update() {}
+  }
+  class Bush extends Object {
+    constructor(game) {
+      super(game);
+      this.game = game;
+      this.image = document.getElementById("bush");
+      this.imageWidth = 216;
+      this.imageHeight = 100;
+      this.width = this.imageWidth;
+      this.height = this.imageHeight;
+      this.x = Math.random() * this.game.width - this.width;
+      this.y =
+        this.game.topMargin +
+        Math.random() * (this.game.height - this.height - this.game.topMargin);
+    }
+  }
+  class Plant extends Object {
+    constructor(game) {
+      super(game);
+      this.game = game;
+      this.image = document.getElementById("plant");
+      this.imageWidth = 212;
+      this.imageHeight = 118;
+      this.width = this.imageWidth;
+      this.height = this.imageHeight;
+      this.x = Math.random() * this.game.width - this.width;
+      this.y =
+        this.game.topMargin +
+        Math.random() * (this.game.height - this.height - this.game.topMargin);
+    }
+  }
+  class Grass extends Object {
+    constructor(game) {
+      super(game);
+      this.game = game;
+      this.image = document.getElementById("grass");
+      this.imageWidth = 103;
+      this.imageHeight = 182;
+      this.width = this.imageWidth;
+      this.height = this.imageHeight;
+      this.x = Math.random() * this.game.width - this.width;
+      this.y =
+        this.game.topMargin +
+        Math.random() * (this.game.height - this.height - this.game.topMargin);
+    }
+  }
   class Game {
     constructor(width, height) {
       this.width = width;
@@ -165,20 +166,29 @@ window.addEventListener("load", function () {
       this.owlbear = new Owlbear(this);
       this.numberOfPlant = 10;
       this.plants = [];
+      this.gameObjects = [];
     }
     render(context, deltaTime) {
-      this.owlbear.draw(context);
-      this.owlbear.update(deltaTime);
-      this.plants.forEach((plant) => plant.draw(context));
+      this.gameObjects = [...this.plants, this.owlbear];
+      this.gameObjects.sort((a, b) => {
+        return a.y + a.height - (b.y + b.height);
+      });
+      this.gameObjects.forEach((object) => {
+        object.draw(context);
+        object.update(deltaTime);
+      });
     }
-    // init() {
-    //   for (let i = 0; i < this.numberOfPlant; i++) {
-    //     this.plants.push(new Plant(this));
-    //   }
-    // }
+    init() {
+      for (let i = 0; i < this.numberOfPlant; i++) {
+        const randomize = Math.random();
+        if (randomize < 0.3) this.plants.push(new Plant(this));
+        else if (randomize < 0.6) this.plants.push(new Bush(this));
+        else this.plants.push(new Grass(this));
+      }
+    }
   }
   const game = new Game(canvas.width, canvas.height);
-  //   game.init();
+  game.init();
   let lastTime = 0;
   function animate(timeStamp) {
     const deltaTime = timeStamp - lastTime;
